@@ -21,36 +21,29 @@ static void ar7240_spi_poll(void);
 static void ar7240_spi_write_page(uint32_t addr, uint8_t *data, int len);
 static void ar7240_spi_sector_erase(uint32_t addr);
 
-static void
-read_id(void)
-{
-    u32 rd = 0x777777;
 
+static u32 read_id(void)
+{
+    u32 id;
+
+    ar7240_reg_wr_nf(AR7240_SPI_FS, 1);
     ar7240_reg_wr_nf(AR7240_SPI_WRITE, AR7240_SPI_CS_DIS);
     ar7240_spi_bit_banger(0x9f);
     ar7240_spi_delay_8();
     ar7240_spi_delay_8();
     ar7240_spi_delay_8();
-    ar7240_spi_done(); 
-    /* rd = ar7240_reg_rd(AR7240_SPI_RD_STATUS); */
-    rd = ar7240_reg_rd(AR7240_SPI_READ); 
-    printf("id read %#x\n", rd);
+    id = ar7240_reg_rd(AR7240_SPI_RD_STATUS);
+    ar7240_spi_done();
+	return id;
 }
 
-unsigned long 
-flash_init (void)
+unsigned long flash_init(void)
 {
-/*    int i;
-    u32 rd = 0x666666; */
+    u32 id;
 
     ar7240_reg_wr_nf(AR7240_SPI_CLOCK, 0x43);
-    read_id();
-/*
-    rd = ar7240_reg_rd(AR7240_SPI_RD_STATUS);
-    printf ("rd = %x\n", rd);
-    if (rd & 0x80) {
-    }
-*/
+    id = read_id();
+    printf("id read %#x\n", id);
 
     /*
      * hook into board specific code to fill flash_info
